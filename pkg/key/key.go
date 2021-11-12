@@ -4,6 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/giantswarm/kubelock"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/rest"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	capa "sigs.k8s.io/cluster-api-provider-aws/api/v1alpha3"
@@ -66,4 +70,32 @@ func IsCidrAlreadyAssociated(cidr string, list []*ec2.VpcCidrBlockAssociation) b
 		}
 	}
 	return false
+}
+
+func GetLock(clusterName string) (kubelock.NamespaceableLock, error) {
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	dynClient, err := dynamic.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+	c := kubelock.Config{
+		DynClient: dynClient,
+		GVR: schema.GroupVersionResource{
+			Resource: "namespace",
+			Group:    v1.SchemeGroupVersion.Group,
+			Version:  v1.SchemeGroupVersion.Version,
+		},
+	}
+	kl, err := kubelock.New(c)
+	if err != nil {
+
+		return nil, err
+	}
+	lock := kl.Lock(clusterName)
+
+	return lock, nil
 }

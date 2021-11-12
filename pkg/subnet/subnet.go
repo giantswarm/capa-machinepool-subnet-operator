@@ -3,16 +3,18 @@ package subnet
 import (
 	"context"
 	"fmt"
-	"github.com/go-logr/logr"
 	"net"
-	capa "sigs.k8s.io/cluster-api-provider-aws/api/v1alpha3"
 	"strconv"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/capa-machinepool-subnet-operator/pkg/key"
 	"github.com/giantswarm/ipam"
+	"github.com/giantswarm/kubelock"
+	"github.com/go-logr/logr"
+	capa "sigs.k8s.io/cluster-api-provider-aws/api/v1alpha3"
 	expcapa "sigs.k8s.io/cluster-api-provider-aws/exp/api/v1alpha3"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -46,12 +48,23 @@ func (s *Service) Reconcile() error {
 	if a, ok := s.AWSMachinePool.GetAnnotations()[key.AnnotationAssignedCIDR]; ok {
 		_, c, err := net.ParseCIDR(a)
 		if err != nil {
-			s.Logger.Error(err,"failed to parse awsMachinePool cidr range")
+			s.Logger.Error(err, "failed to parse awsMachinePool cidr range")
 			return err
 		}
 		cidrBlock = *c
-
 	} else {
+		lock, err := key.GetLock(clusterName)
+		if err != nil {
+			s.Logger.Error(err, "failed to get kubelock for allocation cidr for AWSMachinePool")
+			return err
+		}
+
+		// get lock so no other awsMachinePool cidr allocation run at the same moment
+		err = lock.Acquire(ctx, clusterName, kubelock.AcquireOptions{Owner: clusterName, TTL: time.Minute * 10})
+		if err != nil {
+			s.Logger.Error(err, "failed to acquire kubelock for cidr allocation")
+			return err
+		}
 		// no block is assigned to the MP, get a new one
 		cidrBlock, err = s.getFreeCidrBlock(ctx, clusterName, awsCluster.Spec.NetworkSpec.VPC.CidrBlock)
 		if err != nil {
@@ -62,7 +75,13 @@ func (s *Service) Reconcile() error {
 		s.AWSMachinePool.Annotations[key.AnnotationAssignedCIDR] = cidrBlock.String()
 		err = s.CtrlClient.Update(ctx, s.AWSMachinePool)
 		if err != nil {
-			s.Logger.Error(err,"failed to update AWSMachinePool")
+			s.Logger.Error(err, "failed to update AWSMachinePool")
+			return err
+		}
+
+		err = lock.Release(ctx, clusterName, kubelock.ReleaseOptions{Owner: clusterName})
+		if err != nil {
+			s.Logger.Error(err, "failed to release kubelock for cidr allocation")
 			return err
 		}
 	}
@@ -70,7 +89,7 @@ func (s *Service) Reconcile() error {
 	i := &ec2.DescribeVpcsInput{VpcIds: aws.StringSlice([]string{awsCluster.Spec.NetworkSpec.VPC.ID})}
 	vpcs, err := ec2Client.DescribeVpcs(i)
 	if err != nil {
-		s.Logger.Error(err,"failed to describe VPCs")
+		s.Logger.Error(err, "failed to describe VPCs")
 		return err
 	}
 	// if the cidr block is not associated yet we will add it to the VPC
@@ -81,7 +100,7 @@ func (s *Service) Reconcile() error {
 		}
 		_, err = ec2Client.AssociateVpcCidrBlock(i)
 		if err != nil {
-			s.Logger.Error(err,"failed to associate CIDR block to cluster vpc")
+			s.Logger.Error(err, "failed to associate CIDR block to cluster vpc")
 			return err
 		}
 	}
@@ -91,7 +110,7 @@ func (s *Service) Reconcile() error {
 		// check if the subnets are already added
 		subnetRanges, err := ipam.Split(cidrBlock, uint(azCount))
 		if err != nil {
-			s.Logger.Error(err,fmt.Sprintf("failed to split cidr '%s' into %d zones",cidrBlock.String(), azCount))
+			s.Logger.Error(err, fmt.Sprintf("failed to split cidr '%s' into %d zones", cidrBlock.String(), azCount))
 			return err
 		}
 		clusterSubnetSpecs := awsCluster.Spec.NetworkSpec.Subnets
@@ -126,7 +145,7 @@ func (s *Service) Reconcile() error {
 
 			err = s.CtrlClient.Update(ctx, awsCluster)
 			if err != nil {
-				s.Logger.Error(err,"failed to add new subnets to AWSCluster")
+				s.Logger.Error(err, "failed to add new subnets to AWSCluster")
 				return err
 			}
 		}
@@ -144,14 +163,14 @@ func (s *Service) Delete() error {
 
 		awsCluster, err := key.GetAWSClusterByName(ctx, s.CtrlClient, clusterName)
 		if err != nil {
-			s.Logger.Error(err,"failed to get AWSCluster CR")
+			s.Logger.Error(err, "failed to get AWSCluster CR")
 			return err
 		}
 
 		i := &ec2.DescribeVpcsInput{VpcIds: aws.StringSlice([]string{awsCluster.Spec.NetworkSpec.VPC.ID})}
 		vpcs, err := ec2Client.DescribeVpcs(i)
 		if err != nil {
-			s.Logger.Error(err,"failed to describe VPCs")
+			s.Logger.Error(err, "failed to describe VPCs")
 			return err
 		}
 		var associationID *string
@@ -167,7 +186,7 @@ func (s *Service) Delete() error {
 			}
 			_, err := ec2Client.DisassociateSubnetCidrBlock(i)
 			if err != nil {
-				s.Logger.Error(err,"failed to disassociate cidr block from cluster VPC")
+				s.Logger.Error(err, "failed to disassociate cidr block from cluster VPC")
 				return err
 			}
 		}
@@ -179,7 +198,7 @@ func (s *Service) Delete() error {
 
 		err = s.CtrlClient.Update(ctx, s.AWSMachinePool)
 		if err != nil {
-			s.Logger.Error(err,"failed to remove cidr block  annotation from AWSMachinePool")
+			s.Logger.Error(err, "failed to remove cidr block  annotation from AWSMachinePool")
 			return err
 		}
 	}
