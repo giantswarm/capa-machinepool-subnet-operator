@@ -65,10 +65,7 @@ func (r *AWSMachinePoolReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 	}
 
 	clusterName := key.GetClusterIDFromLabels(awsMachinePool.ObjectMeta)
-
 	logger = logger.WithValues("cluster", clusterName)
-
-	// check if subnets are already set
 
 	var awsClientGetter *awsclient.AwsClient
 	{
@@ -92,11 +89,11 @@ func (r *AWSMachinePoolReconciler) Reconcile(req ctrl.Request) (ctrl.Result, err
 
 	subnetService := subnet.Service{
 		AWSMachinePool: awsMachinePool,
-		AWSSession: awsClientSession,
-		CtrlClient: r.Client,
-		CidrRange: r.DefaultCidrRange,
-		Logger: logger,
-		SubnetSize: r.DefaultSubnetSize,
+		AWSSession:     awsClientSession,
+		CtrlClient:     r.Client,
+		CidrRange:      r.DefaultCidrRange,
+		Logger:         logger,
+		SubnetSize:     r.DefaultSubnetSize,
 	}
 
 	if awsMachinePool.DeletionTimestamp != nil {
