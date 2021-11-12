@@ -1,0 +1,17 @@
+domain: giantswarm.io
+layout:
+- go.kubebuilder.io/v3
+projectName: capa-machinepool-subnet-operator
+repo: github.com/giantswarm/capa-machinepool-subnet-operator
+resources:
+- controller: true
+  domain: giantswarm.io
+  group: infrastructure.cluster.x-k8s.io
+  kind: AWSMachineTemplate
+  version: v1alpha3
+- controller: true
+  domain: giantswarm.io
+  group: infrastructure.cluster.x-k8s.io
+  kind: AWSMachinePool
+  version: v1alpha3
+version: "3"

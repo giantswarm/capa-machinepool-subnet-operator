@@ -1,0 +1,9 @@
+name: capa-machinepool-subnet-operator
+version: [[ .Version ]]
+description: "Operator for managing IAM roles for CAPA clusters"
+appVersion: "[[ .AppVersion ]]"
+home: "https://github.com/giantswarm/capa-machinepool-subnet-operator"
+apiVersion: v1
+annotations:
+  application.giantswarm.io/team: "phoenix"
+  config.giantswarm.io/version: 1.x.x
