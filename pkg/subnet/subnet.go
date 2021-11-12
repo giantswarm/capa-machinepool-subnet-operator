@@ -10,13 +10,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/giantswarm/capa-machinepool-subnet-operator/pkg/key"
 	"github.com/giantswarm/ipam"
 	"github.com/giantswarm/kubelock"
 	"github.com/go-logr/logr"
 	capa "sigs.k8s.io/cluster-api-provider-aws/api/v1alpha3"
 	expcapa "sigs.k8s.io/cluster-api-provider-aws/exp/api/v1alpha3"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/giantswarm/capa-machinepool-subnet-operator/pkg/key"
 )
 
 type Service struct {

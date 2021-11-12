@@ -22,11 +22,10 @@ import (
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
-	"k8s.io/klog/klogr"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
+	"k8s.io/klog/klogr"
 	capa "sigs.k8s.io/cluster-api-provider-aws/api/v1alpha3"
 	expcapa "sigs.k8s.io/cluster-api-provider-aws/exp/api/v1alpha3"
 	capi "sigs.k8s.io/cluster-api/api/v1alpha3"
@@ -58,8 +57,8 @@ func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
-	flag.StringVar(&defaultCidrRange, "default-cidr-range", "10.10.0.0/16","The default range which will be used to pick  free range for the subnets")
-	flag.StringVar(&defaultSubnetSize, "default-subnet-size","24", "Default size of subnet prefix for each AZ")
+	flag.StringVar(&defaultCidrRange, "default-cidr-range", "10.10.0.0/16", "The default range which will be used to pick  free range for the subnets")
+	flag.StringVar(&defaultSubnetSize, "default-subnet-size", "24", "Default size of subnet prefix for each AZ")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
