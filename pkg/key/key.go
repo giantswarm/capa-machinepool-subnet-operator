@@ -3,13 +3,13 @@ package key
 import (
 	"context"
 	"fmt"
+
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/giantswarm/kubelock"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
-
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	capa "sigs.k8s.io/cluster-api-provider-aws/api/v1alpha3"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -17,7 +17,6 @@ import (
 const (
 	ClusterNameLabel        = "cluster.x-k8s.io/cluster-name"
 	ClusterWatchFilterLabel = "cluster.x-k8s.io/watch-filter"
-	ClusterRole             = "cluster.x-k8s.io/role"
 
 	FinalizerName = "capa-machinepool-subnet-operator.finalizers.giantswarm.io"
 
