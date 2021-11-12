@@ -19,7 +19,6 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"github.com/giantswarm/capa-machinepool-subnet-operator/pkg/subnet"
 	"time"
 
 	"github.com/go-logr/logr"
@@ -31,6 +30,7 @@ import (
 
 	"github.com/giantswarm/capa-machinepool-subnet-operator/pkg/awsclient"
 	"github.com/giantswarm/capa-machinepool-subnet-operator/pkg/key"
+	"github.com/giantswarm/capa-machinepool-subnet-operator/pkg/subnet"
 )
 
 // AWSMachinePoolReconciler reconciles a AWSMachinePool object
