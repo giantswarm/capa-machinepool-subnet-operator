@@ -57,8 +57,9 @@ func HasCapiWatchLabel(labels map[string]string) bool {
 }
 
 func SubnetTags(nodepoolName string) capa.Tags {
-	var tags capa.Tags
-	tags[MachinePoolSubnetTag] = nodepoolName
+	tags := map[string]string{
+		MachinePoolSubnetTag: nodepoolName,
+	}
 	return tags
 }
 

@@ -215,6 +215,9 @@ func (s *Service) getFreeCidrBlock(ctx context.Context, clusterName string, vpcC
 
 	subnetIPMask := net.CIDRMask(size, 32)
 	_, subnetRange, err := net.ParseCIDR(s.CidrRange)
+	if err != nil {
+		return net.IPNet{}, err
+	}
 
 	var usedSubnets []net.IPNet
 	{
