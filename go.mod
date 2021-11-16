@@ -6,6 +6,7 @@ require (
 	github.com/Azure/go-autorest/autorest v0.11.18 // indirect
 	github.com/aws/aws-sdk-go v1.40.53
 	github.com/giantswarm/ipam v0.3.0
+	github.com/giantswarm/kubelock v0.2.0
 	github.com/go-logr/logr v0.1.0
 	github.com/google/go-cmp v0.5.6 // indirect
 	k8s.io/api v0.17.17
@@ -18,7 +19,7 @@ require (
 )
 
 replace (
-	github.com/coreos/etcd v3.3.10+incompatible => github.com/coreos/etcd v3.3.25+incompatible
+	github.com/coreos/etcd v3.3.17+incompatible => github.com/coreos/etcd v3.3.25+incompatible
 	github.com/dgrijalva/jwt-go => github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
 	github.com/gogo/protobuf v1.3.1 => github.com/gogo/protobuf v1.3.2
 	github.com/gorilla/websocket v1.4.0 => github.com/gorilla/websocket v1.4.2
