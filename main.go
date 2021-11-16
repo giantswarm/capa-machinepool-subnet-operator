@@ -57,7 +57,7 @@ func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
-	flag.StringVar(&defaultCidrRange, "default-cidr-range", "10.10.0.0/16", "The default range which will be used to pick  free range for the subnets")
+	flag.StringVar(&defaultCidrRange, "default-cidr-range", "10.10.0.0/16", "The default range which will be used to pick free range for the subnets")
 	flag.StringVar(&defaultSubnetSize, "default-subnet-size", "24", "Default size of subnet prefix for each AZ")
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")

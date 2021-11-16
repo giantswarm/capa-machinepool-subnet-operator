@@ -48,10 +48,8 @@ func GetAWSClusterByName(ctx context.Context, ctrlClient client.Client, clusterN
 
 func HasCapiWatchLabel(labels map[string]string) bool {
 	value, ok := labels[ClusterWatchFilterLabel]
-	if ok {
-		if value == "capi" {
-			return true
-		}
+	if ok && value == "capi" {
+		return true
 	}
 	return false
 }
@@ -92,7 +90,6 @@ func GetLock(clusterName string) (kubelock.NamespaceableLock, error) {
 	}
 	kl, err := kubelock.New(c)
 	if err != nil {
-
 		return nil, err
 	}
 	lock := kl.Lock(clusterName)
