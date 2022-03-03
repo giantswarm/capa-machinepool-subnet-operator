@@ -38,6 +38,19 @@ workflows:
             tags:
               only: /^v.*/
 
+      - architect/push-to-docker:
+          context: "architect"
+          name: push-capa-machinepool-subnet-operator-to-docker
+          image: "docker.io/giantswarm/capa-machinepool-subnet-operator"
+          username_envar: "DOCKER_USERNAME"
+          password_envar: "DOCKER_PASSWORD"
+          requires:
+            - go-build
+          # Needed to trigger job also on git tag.
+          filters:
+            tags:
+              only: /^v.*/
+
       - architect/push-to-app-catalog:
           context: "architect"
           name: push-capa-machinepool-subnet-operator-to-app-catalog
@@ -48,5 +61,22 @@ workflows:
             - push-capa-machinepool-subnet-operator-to-quay
           # Needed to trigger job also on git tag.
           filters:
+            tags:
+              only: /^v.*/
+
+      - architect/push-to-app-collection:
+          name: aws-app-collection
+          context: "architect"
+          app_name: "capa-machinepool-subnet-operator"
+          app_namespace: "giantswarm"
+          app_collection_repo: "aws-app-collection"
+          requires:
+            - push-capa-machinepool-subnet-operator-to-quay
+            - push-capa-machinepool-subnet-operator-to-docker
+            - push-capa-machinepool-subnet-operator-to-aliyun
+            - push-capa-machinepool-subnet-operator-to-app-catalog
+          filters:
+            branches:
+              ignore: /.*/
             tags:
               only: /^v.*/
